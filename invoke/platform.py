@@ -159,4 +159,10 @@ def bytes_to_read(input_):
     # TODO: probably also 'or WINDOWS'
     if not has_fileno(input_):
         return 1
-    return struct.unpack('h', fcntl.ioctl(input_, termios.FIONREAD, "  "))[0]
+    try:
+        return struct.unpack(
+            'h', fcntl.ioctl(input_, termios.FIONREAD, "  "))[0]
+    except IOError as e:
+        if e.errno == 19:  # Operation not supported by device
+            return 1
+        raise
